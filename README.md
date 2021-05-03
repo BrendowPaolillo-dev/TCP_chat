@@ -1,6 +1,6 @@
 # Description
 
-An react chat project implemmented using nodejs websockets.
+A react chat project implemmented using nodejs websockets.
 
 ## Dependencies
 
