@@ -1,7 +1,18 @@
+import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
+const App = () => {
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8080');
+    ws.onopen = () => {
+      ws.send('Olá para todos!');
+      console.log('onopen websocket');
+    }
+    ws.onmessage = msg => console.log('mensagem recebida: ', msg)
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
