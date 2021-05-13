@@ -17,13 +17,19 @@ const Message = props => {
     const {
         text,
         file,
+        userName,
         messageColor,
     } = props;
 
     return (
-        <div className="message" style={{ backgroundColor: messageColor ?? 'red' }} >
-            {getMessage(text, file)}
-        </div>
+        <>
+            <div className="username-message">
+                {userName ?? 'Ciclano:'}
+            </div>
+            <div className="message" style={{ backgroundColor: messageColor ?? 'red' }} >
+                {getMessage(text, file)}
+            </div>
+        </>
     );
 };
 
