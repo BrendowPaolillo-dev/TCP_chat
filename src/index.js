@@ -6,9 +6,13 @@ import reportWebVitals from './reportWebVitals';
 
 import 'antd/dist/antd.css';
 
+import { createBrowserHistory } from "history";
+
+const customHistory = createBrowserHistory();
+
 ReactDOM.render(
   	<React.StrictMode>
-    	<App />
+    	<App history={customHistory}/>
   	</React.StrictMode>,
   document.getElementById('root')
 );

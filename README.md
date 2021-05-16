@@ -14,6 +14,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Run it
 
-First of all we need to start de server to comunicate between clients: `node server.js`
+Run the follow command: `yarn install` followed by `yarn start`.
 
-Now start your client. Run the follow command: `yarn install` followed by `yarn start`.
+Now start de server to comunicate between clients: `node server.js`

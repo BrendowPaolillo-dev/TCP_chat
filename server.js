@@ -6,7 +6,9 @@ const hostname = '127.0.0.1';
 const server = new WebSocket.Server({
   port
 });
+
 let sockets = [];
+
 server.on('connection', function(socket) {
   // Adicionamos cada nova conexão/socket ao array `sockets`
   sockets.push(socket);

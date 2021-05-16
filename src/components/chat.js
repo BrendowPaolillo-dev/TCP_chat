@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 
 import {
     Row,
@@ -45,4 +46,4 @@ const Chat = props => {
     );
 };
 
-export default Chat;
+export default withRouter(Chat);
