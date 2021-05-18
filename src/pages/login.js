@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import {
@@ -8,7 +8,7 @@ import {
     Button,
 } from 'antd';
 
-import Storage from '../storage';
+import Storage from '../auxiliary/storage';
 
 const Login = ({ history }) => {
     const [userName, setUserName] = useState('');

@@ -1,48 +1,129 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+
+import Storage from '../auxiliary/storage';
 
 import {
     Row,
     Input,
+    Button,
 } from 'antd';
 
 import { MenuOutlined, MessageOutlined } from '@ant-design/icons';
 
 import Message from './message';
+import MainLayout from './mainLayout';
 
 import './chat.css';
 
-const Chat = props => {
-    const {
-        userName,
-        sendFile,
-        sendMessage,
-    } = props;
+const Chat = () => {
 
-    const buttonSuffix = (
-        <span className="link-enviar">
-            Enviar
-            <MessageOutlined style={{ marginLeft: 5 }}/>
-        </span>
+    const userName = Storage.getUserName();
+
+    const [userMessage, setUserMessage] = useState('');
+    const [newMessage, setNewMessage] = useState({});
+    const [allMessages, setAllMessages] = useState([]);
+
+    const [ws] = useState(new WebSocket('ws://localhost:8080'));
+
+    const join = () => {
+        const msg = [1, userName];
+        ws.send(btoa(JSON.stringify(msg)));
+    }
+
+    const sendMessage = () => {
+        const msg = [2, userName, userMessage];
+        ws.send(btoa(JSON.stringify(msg)));
+        setUserMessage('');
+    }
+
+    const userHasConnected = newUserName => (
+        <div className="new-user-connected">
+            {`Usuário ${newUserName} conectado`}
+        </div>
     );
 
+    const myMessage = text => (
+        <Row justify="end">
+            <Message messageColor="blue" text={text} />
+        </Row>
+    );
+
+    const otherMessage = (text, senderName) => (
+        <Row justify="start">
+            <Message text={text} userName={senderName}/>
+        </Row>
+    );
+    
+    const globalMessage = (senderName, text) => {
+        if (senderName === userName) return myMessage(text);
+
+        return otherMessage(text, senderName);
+    }
+
+    const displayMessages = ({ code, senderName, text, file }) => {
+
+        console.log('displayMessages: ', code, senderName);
+        switch(code){
+            case 1:
+                console.log('new User: ', userName, senderName);
+                if (userName !== senderName) return userHasConnected(senderName);
+                break;
+            case 2:
+                return globalMessage(senderName, text);
+            case 3:
+            case 4:
+            case 5:
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    useEffect(() => setAllMessages([...allMessages, newMessage]), [newMessage]);
+
+    const updateMessages = useCallback(data => {
+        const [code, senderName, text = '', file = ''] = JSON.parse(atob(data));
+        setNewMessage({ id: allMessages.length, code, senderName, text, file });
+    }, [allMessages]);
+
+    useEffect(() => {
+        ws.onopen = () => join('user1');
+        ws.onmessage = ({ data }) => updateMessages(data);
+    }, []);
+
     return (
-        <div className="chat">
-            <Row justify="space-between" className="chat-header">
-                Fulano
-                <MenuOutlined className="menu-icon" />
+        <MainLayout>
+            <Row justify="center">
+                <div className="chat">
+                    <Row justify="space-between" className="chat-header">
+                        {userName}
+                        <MenuOutlined className="menu-icon" />
+                    </Row>
+                    <div className="chat-body">
+                        {allMessages.map(message => displayMessages(message))}
+                    </div>
+                    <div className="chat-footer">
+                        <Input
+                            value={userMessage}
+                            className="footer-input"
+                            placeholder="Insira a mensagem"
+                            onChange={e => setUserMessage(e.target.value)}
+                        />
+                        <Button
+                            type="primary"
+                            onClick={sendMessage}
+                        >
+                            <span className="link-enviar">
+                                Enviar
+                                <MessageOutlined style={{ marginLeft: 5 }}/>
+                            </span>
+                        </Button>
+                    </div>
+                </div>
             </Row>
-            <div className="chat-body">
-                <Message text="Mensagem de alguém" />
-            </div>
-            <div className="chat-footer">
-                <Input
-                    suffix={buttonSuffix}
-                    className="footer-input"
-                    placeholder="Insira a mensagem"
-                />
-            </div>
-        </div>
+        </MainLayout>
     );
 };
 

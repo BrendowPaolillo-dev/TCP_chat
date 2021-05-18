@@ -22,14 +22,14 @@ const Message = props => {
     } = props;
 
     return (
-        <>
+        <div style={{ display: 'inline-block' }}>
             <div className="username-message">
-                {userName ?? 'Ciclano:'}
+                {userName ?? ''}
             </div>
             <div className="message" style={{ backgroundColor: messageColor ?? 'red' }} >
                 {getMessage(text, file)}
             </div>
-        </>
+        </div>
     );
 };
 
