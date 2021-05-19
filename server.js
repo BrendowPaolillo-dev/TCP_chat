@@ -46,20 +46,20 @@ function manageMessages(msg) {
   	const [code, senderName, text = '', file = ''] = stringMsg;
 
   	switch(code){
-		case 1:
-			clientsConnected.push(senderName);
-			console.log('Clientes conectados: ', clientsConnected);
-			sockets.forEach(s => s.send(msg));
-			break;
-		case 2:
-			sockets.forEach(s => s.send(msg));
-			break;
-		case 3:
-			break;
-		case 4:
-			break;
-		default:
-			break;
+      case 1:
+        clientsConnected.push(senderName);
+        console.log('Clientes conectados: ', clientsConnected);
+        sockets.forEach(s => s.send(msg));
+        break;
+      case 2:
+        sockets.forEach(s => s.send(msg));
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+      default:
+        break;
 	}
 
 };
@@ -68,8 +68,8 @@ function closeConnection(socket) {
 	const msg = [5, socket.protocol]
 	sockets = sockets.filter(s => s !== socket);
 	clientsConnected = clientsConnected.filter(c => c !== socket.protocol);
-	console.log('Clientes conectados: ', sockets.length ,clientsConnected);
-	sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
+	console.log('Clientes conectados close: ', sockets.length ,clientsConnected);
+  sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
 };
 
 function getFileBase64(img, callback) {

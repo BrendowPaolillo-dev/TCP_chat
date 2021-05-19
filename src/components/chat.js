@@ -20,12 +20,13 @@ const Chat = () => {
 
     const userName = Storage.getUserName();
 
+    let clientsConnected = [];
+
     const [ws, setWs] = useState(null);
 
     const [userMessage, setUserMessage] = useState('');
     const [newMessage, setNewMessage] = useState({});
     const [allMessages, setAllMessages] = useState([]);
-    const [clientsConnected, setClientsConnected]  = useState([]);
     
     const join = () => {
         const msg = [1, userName];
@@ -42,7 +43,6 @@ const Chat = () => {
         ws.send(btoa(JSON.stringify(msg)));
         setUserMessage('');
     }
-
 
     const userHasConnected = newUserName => (
         <div className="new-user-connected">
@@ -75,11 +75,10 @@ const Chat = () => {
     }
 
     const displayMessages = ({ code, senderName, text, file }) => {
-
         switch(code){
             case 1:
                 if (userName !== senderName) {
-                    setClientsConnected([...clientsConnected, senderName]);
+                    clientsConnected.push(senderName);
                     return userHasConnected(senderName);
                 }
                 break;
@@ -90,9 +89,9 @@ const Chat = () => {
             case 4:
                 break;
             case 5:
-                // console.log(888888, clientsConnected);
-                // console.log(99999, clientsConnected.filter(c => c !== senderName));
-                // setClientsConnected(clientsConnected.filter(c => c !== senderName));
+                if (userName !== senderName) {
+                    clientsConnected = clientsConnected.filter(c => c !== senderName);
+                }
                 return userHasDisconnected(senderName);
             default:
                 break;
@@ -102,24 +101,20 @@ const Chat = () => {
 
     useEffect(() => setAllMessages([...allMessages, newMessage]), [newMessage]);
 
-    const updateMessages = useCallback(data => {
+    const updateMessages = data => {
         const [code, senderName, text = '', file = ''] = JSON.parse(atob(data));
         setNewMessage({ id: allMessages.length, code, senderName, text, file });
-    }, [allMessages]);
+    };
 
     useEffect(() => {
         if (ws) {
             ws.onopen = () => join('user1');
             ws.onmessage = ({ data }) => updateMessages(data);
+            return () => closeConnection();
+        } else {
+            setWs(new WebSocket('ws://localhost:8080', userName));
         }
     }, [ws]);
-
-    useEffect(() => {
-        setWs(new WebSocket('ws://localhost:8080', userName));
-        return () => {
-            if(ws) return closeConnection();
-        };
-    }, []);
 
     return (
         <MainLayout>
