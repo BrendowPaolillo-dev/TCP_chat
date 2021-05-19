@@ -25,7 +25,8 @@ const Chat = () => {
     const [userMessage, setUserMessage] = useState('');
     const [newMessage, setNewMessage] = useState({});
     const [allMessages, setAllMessages] = useState([]);
-
+    const [clientsConnected, setClientsConnected]  = useState([]);
+    
     const join = () => {
         const msg = [1, userName];
         ws.send(btoa(JSON.stringify(msg)));
@@ -49,9 +50,9 @@ const Chat = () => {
         </div>
     );
 
-    const userHasDisconnected = newUserName => (
+    const userHasDisconnected = user => (
         <div className="new-user-connected">
-            {`Usuário ${newUserName} Desconectado`}
+            {`Usuário ${user} Desconectado`}
         </div>
     );
 
@@ -77,7 +78,10 @@ const Chat = () => {
 
         switch(code){
             case 1:
-                if (userName !== senderName) return userHasConnected(senderName);
+                if (userName !== senderName) {
+                    setClientsConnected([...clientsConnected, senderName]);
+                    return userHasConnected(senderName);
+                }
                 break;
             case 2:
                 return globalMessage(senderName, text);
@@ -86,6 +90,9 @@ const Chat = () => {
             case 4:
                 break;
             case 5:
+                // console.log(888888, clientsConnected);
+                // console.log(99999, clientsConnected.filter(c => c !== senderName));
+                // setClientsConnected(clientsConnected.filter(c => c !== senderName));
                 return userHasDisconnected(senderName);
             default:
                 break;

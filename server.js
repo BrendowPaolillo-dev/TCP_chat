@@ -5,10 +5,9 @@
  * Codes:
  *  1: Join
  *  2: Global message
- * 	3: Get clientsList
- *  4: Private message
- *  5: file share
- *  6: close connection
+ *  3: Private message
+ *  4: file share
+ *  5: close connection
  *  
  */
 
@@ -69,8 +68,15 @@ function closeConnection(socket) {
 	const msg = [5, socket.protocol]
 	sockets = sockets.filter(s => s !== socket);
 	clientsConnected = clientsConnected.filter(c => c !== socket.protocol);
-	console.log('Clientes conectados: ', clientsConnected);
+	console.log('Clientes conectados: ', sockets.length ,clientsConnected);
 	sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
+};
+
+function getFileBase64(img, callback) {
+	const reader = new FileReader();
+	reader.addEventListener('load', () => callback(reader.result));
+	// reader.addEventListener('error', () => { setLoading(false); });
+	reader.readAsDataURL(img);
 };
 
 function toBase64(msg) {
