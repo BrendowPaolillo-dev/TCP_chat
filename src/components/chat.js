@@ -20,14 +20,19 @@ const Chat = () => {
 
     const userName = Storage.getUserName();
 
+    const [ws, setWs] = useState(null);
+
     const [userMessage, setUserMessage] = useState('');
     const [newMessage, setNewMessage] = useState({});
     const [allMessages, setAllMessages] = useState([]);
 
-    const [ws] = useState(new WebSocket('ws://localhost:8080'));
-
     const join = () => {
         const msg = [1, userName];
+        ws.send(btoa(JSON.stringify(msg)));
+    }
+
+    const closeConnection = () => {
+        const msg = [5, userName];
         ws.send(btoa(JSON.stringify(msg)));
     }
 
@@ -37,9 +42,16 @@ const Chat = () => {
         setUserMessage('');
     }
 
+
     const userHasConnected = newUserName => (
         <div className="new-user-connected">
             {`Usuário ${newUserName} conectado`}
+        </div>
+    );
+
+    const userHasDisconnected = newUserName => (
+        <div className="new-user-connected">
+            {`Usuário ${newUserName} Desconectado`}
         </div>
     );
 
@@ -63,18 +75,18 @@ const Chat = () => {
 
     const displayMessages = ({ code, senderName, text, file }) => {
 
-        console.log('displayMessages: ', code, senderName);
         switch(code){
             case 1:
-                console.log('new User: ', userName, senderName);
                 if (userName !== senderName) return userHasConnected(senderName);
                 break;
             case 2:
                 return globalMessage(senderName, text);
             case 3:
-            case 4:
-            case 5:
                 break;
+            case 4:
+                break;
+            case 5:
+                return userHasDisconnected(senderName);
             default:
                 break;
         }
@@ -89,8 +101,17 @@ const Chat = () => {
     }, [allMessages]);
 
     useEffect(() => {
-        ws.onopen = () => join('user1');
-        ws.onmessage = ({ data }) => updateMessages(data);
+        if (ws) {
+            ws.onopen = () => join('user1');
+            ws.onmessage = ({ data }) => updateMessages(data);
+        }
+    }, [ws]);
+
+    useEffect(() => {
+        setWs(new WebSocket('ws://localhost:8080', userName));
+        return () => {
+            if(ws) return closeConnection();
+        };
     }, []);
 
     return (
@@ -108,6 +129,7 @@ const Chat = () => {
                         <Input
                             value={userMessage}
                             className="footer-input"
+                            onPressEnter={sendMessage}
                             placeholder="Insira a mensagem"
                             onChange={e => setUserMessage(e.target.value)}
                         />

@@ -5,9 +5,10 @@
  * Codes:
  *  1: Join
  *  2: Global message
- *  3: Private message
- *  4: file share
- *  5: Client disconect
+ * 	3: Get clientsList
+ *  4: Private message
+ *  5: file share
+ *  6: close connection
  *  
  */
 
@@ -20,12 +21,11 @@ const server = new WebSocket.Server({
   	port
 });
 
-const sockets = [];
-const clientsConnected = [];
+let sockets = [];
+let clientsConnected = [];
 
 server.on('connection', function(socket) {
 	// Adicionamos cada nova conexão/socket ao array `sockets`
-
 	sockets.push(socket);
 
 	// Quando você receber uma mensagem, enviamos ela para todos os sockets
@@ -35,7 +35,7 @@ server.on('connection', function(socket) {
 	
 	// Quando a conexão de um socket é fechada/disconectada, removemos o socket do array
 	socket.on('close', function() {
-		sockets = sockets.filter(s => s !== socket);
+		closeConnection(socket)
 	});
 });
 
@@ -49,6 +49,8 @@ function manageMessages(msg) {
   	switch(code){
 		case 1:
 			clientsConnected.push(senderName);
+			console.log('Clientes conectados: ', clientsConnected);
+			sockets.forEach(s => s.send(msg));
 			break;
 		case 2:
 			sockets.forEach(s => s.send(msg));
@@ -56,8 +58,6 @@ function manageMessages(msg) {
 		case 3:
 			break;
 		case 4:
-		break;
-		case 5:
 			break;
 		default:
 			break;
@@ -65,8 +65,16 @@ function manageMessages(msg) {
 
 };
 
+function closeConnection(socket) {
+	const msg = [5, socket.protocol]
+	sockets = sockets.filter(s => s !== socket);
+	clientsConnected = clientsConnected.filter(c => c !== socket.protocol);
+	console.log('Clientes conectados: ', clientsConnected);
+	sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
+};
+
 function toBase64(msg) {
-	return Buffer.from('Hello World!').toString('base64')
+	return Buffer.from(msg).toString('base64')
 };
 
 function base64ToString(msg) {
