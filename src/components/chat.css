@@ -23,6 +23,7 @@
 }
 
 .chat-body {
+    padding: 24px;
     height: 500px;
     overflow-y: auto;
     background-color: rgba(0, 0, 0, 0.2);

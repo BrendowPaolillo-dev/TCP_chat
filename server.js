@@ -5,9 +5,10 @@
  * Codes:
  *  1: Join
  *  2: Global message
- *  3: Private message
- *  4: file share
- *  5: close connection
+ * 	3: getUserList
+ *  4: Private message
+ *  5: file share
+ *  6: close connection
  *  
  */
 
@@ -43,33 +44,41 @@ console.log(`Server running at http://${hostname}:${port}/`);
 
 function manageMessages(msg) {
 	const stringMsg = JSON.parse(base64ToString(msg));
-  	const [code, senderName, text = '', file = ''] = stringMsg;
+  	const [code, senderName, text = '', destination, file = ''] = stringMsg;
 
   	switch(code){
-      case 1:
-        clientsConnected.push(senderName);
-        console.log('Clientes conectados: ', clientsConnected);
-        sockets.forEach(s => s.send(msg));
-        break;
-      case 2:
-        sockets.forEach(s => s.send(msg));
-        break;
-      case 3:
-        break;
-      case 4:
-        break;
-      default:
-        break;
+      	case 1:
+			clientsConnected.push(senderName);
+			console.log('Clientes conectados: ', clientsConnected);
+			sockets.forEach(s => s.send(msg));
+			break;
+      	case 2:
+			sockets.forEach(s => s.send(msg));
+			break;
+      	case 3:
+			getClientsConnected(senderName);
+        	break;
+      	case 4:
+			  sockets.find(s => s.protocol === destination).send(msg)
+        	break;
+		default:
+	        break;
 	}
 
 };
 
+function getClientsConnected(senderName) {
+	const s = sockets.find(socket => socket.protocol === senderName);
+	const msg = [3, senderName, clientsConnected.filter(c => c !== senderName)];
+	s.send(toBase64(JSON.stringify(msg)));
+};
+
 function closeConnection(socket) {
-	const msg = [5, socket.protocol]
+	const msg = [6, socket.protocol]
 	sockets = sockets.filter(s => s !== socket);
 	clientsConnected = clientsConnected.filter(c => c !== socket.protocol);
 	console.log('Clientes conectados close: ', sockets.length ,clientsConnected);
-  sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
+  	sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
 };
 
 function getFileBase64(img, callback) {
