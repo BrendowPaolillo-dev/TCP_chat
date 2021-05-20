@@ -60,12 +60,14 @@ function manageMessages(msg) {
 			getClientsConnected(senderName);
         	break;
       	case 4:
+			findSocketDestination(senderName).send(msg);
 			findSocketDestination(destination).send(msg)
         	break;
 		case 5:
 			sockets.forEach(s => s.send(msg));
 			break;
 		case 6:
+			findSocketDestination(senderName).send(msg);
 			findSocketDestination(destination).send(msg)
 			break;
 		default:

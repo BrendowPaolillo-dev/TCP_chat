@@ -100,18 +100,23 @@ const Chat = () => {
         return otherMessage(text, senderName);
     }
 
-    const privateMessage = (senderName, text) => (
-        <>
-            <Row justify="start" style={{ marginTop: 15 }}>
-                <span style={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: 10, marginLeft: 10 }}>
-                    {`Mensagem privada de ${senderName}: `}
-                </span>
-            </Row>
-            <Row justify="start">
-                <Message text={text} userName={senderName}/>
-            </Row>
-        </>
-    );
+    const privateMessage = (senderName, text) => {
+        if (senderName !== userName) {
+            return (
+                <>
+                    <Row justify="start" style={{ marginTop: 15 }}>
+                        <span style={{ color: 'rgba(0, 0, 0, 0.6)', fontSize: 10, marginLeft: 10 }}>
+                            {`Mensagem privada de ${senderName}: `}
+                        </span>
+                    </Row>
+                    <Row justify="start">
+                        <Message text={text} userName={senderName}/>
+                    </Row>
+                </>
+            );
+        } else return myMessage(text);
+        
+    };
 
     const fileToDownload = (code, senderName, file, name, whoSend) => {
         const isFromMe = whoSend === userName
@@ -181,7 +186,6 @@ const Chat = () => {
                 return manageDownloadFile(5, senderName, file);
             case 6:
                 return manageDownloadFile(6, senderName, file);
-                break;
             case 7:
                 return userHasDisconnected(senderName);
             default:
