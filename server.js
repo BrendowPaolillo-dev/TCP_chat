@@ -42,31 +42,38 @@ server.on('connection', function(socket) {
 console.log(`Server running at http://${hostname}:${port}/`);
 
 
+// Função para gerenciar e redirecionar mensagens recebidas dos clientes
 function manageMessages(msg) {
 	const stringMsg = JSON.parse(base64ToString(msg));
   	const [code, senderName, _, destination, __] = stringMsg;
 	
 
   	switch(code){
-      	case 1:
+		  case 1:
+			// join
 			clientsConnected.push(senderName);
 			console.log('Clientes conectados: ', clientsConnected);
 			sockets.forEach(s => s.send(msg));
 			break;
-      	case 2:
+		case 2:
+			// mensagem global
 			sockets.forEach(s => s.send(msg));
 			break;
-      	case 3:
+		case 3:
+			// get clients list
 			getClientsConnected(senderName);
         	break;
-      	case 4:
+		case 4:
+			// mensagem privada
 			findSocketDestination(senderName).send(msg);
 			findSocketDestination(destination).send(msg)
         	break;
+			// arquivo global
 		case 5:
 			sockets.forEach(s => s.send(msg));
 			break;
 		case 6:
+			// arquivo privado
 			findSocketDestination(senderName).send(msg);
 			findSocketDestination(destination).send(msg)
 			break;
@@ -76,16 +83,19 @@ function manageMessages(msg) {
 
 };
 
+// Retorna o socket equivalente ao cliente destino
 function findSocketDestination(destination) {
 	return sockets.find(s => s.protocol === destination);
 }
 
+// Retorna uma lista de todos os clientes conectados 
 function getClientsConnected(senderName) {
 	const s = sockets.find(socket => socket.protocol === senderName);
 	const msg = [3, senderName, clientsConnected.filter(c => c !== senderName)];
 	s.send(toBase64(JSON.stringify(msg)));
 };
 
+// Rotina de encerramento de conexão
 function closeConnection(socket) {
 	const msg = [7, socket.protocol]
 	sockets = sockets.filter(s => s !== socket);
@@ -94,10 +104,12 @@ function closeConnection(socket) {
   	sockets.forEach(s => s.send(toBase64(JSON.stringify(msg))));
 };
 
+// Converte string para base64
 function toBase64(msg) {
 	return Buffer.from(msg).toString('base64')
 };
 
+// Converte base64 para string
 function base64ToString(msg) {
 	return Buffer.from(msg, 'base64').toString()
 };

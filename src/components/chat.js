@@ -163,6 +163,9 @@ const Chat = () => {
         const blob = new Blob([dataSource], { type });
         const file = new File([blob], name, { type });
 
+        console.log('source: ', dataSource);
+        console.log('manageDownload: ', file);
+
         if (senderName === userName) {
             return fileToDownload(code, senderName, file, name, userName);
         } else {
@@ -209,25 +212,21 @@ const Chat = () => {
 
     useEffect(() => setAllMessages([...allMessages, newMessage]), [newMessage]);
 
-    const manageMessages = msg => {
+    const manageMessages = async msg => {
         const [code, senderName, data, _, file] = JSON.parse(atob(msg));
 
         const pushNewMessage = () => setNewMessage({ id: allMessages.length, code, senderName, text: data, file });
         
         switch(code){
             case 1:
-                if (userName !== senderName) {
-                    setClientsConnected(clientsConnected.concat(senderName));
-                } else {
-                    setClientsConnected(getUserList());
-                }
+                setClientsConnected(getUserList());
                 pushNewMessage();
                 break;
             case 3:
                 setClientsConnected(data);
                 break;
             case 7:
-                setClientsConnected(clientsConnected.filter(c => c !== senderName));
+                await setClientsConnected(clientsConnected.filter(c => c !== senderName));
                 pushNewMessage();
                 break;
             default:
@@ -262,7 +261,7 @@ const Chat = () => {
                     <div className="chat-body">
                         {allMessages.map(message => displayMessages(message))}
                     </div>
-                    <div className="chat-footer">
+                    <Row justify="space-between" className="chat-footer">
                         <Input
                             value={userMessage}
                             className="footer-input"
@@ -279,7 +278,7 @@ const Chat = () => {
                                 <MessageOutlined style={{ marginLeft: 5 }}/>
                             </span>
                         </Button>
-                    </div>
+                    </Row>
                 </div>
             </Row>
         </MainLayout>
